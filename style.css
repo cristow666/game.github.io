@@ -1,0 +1,60 @@
+body {
+  background: radial-gradient(circle, #00ffcc, #001f1f);
+  font-family: Arial, sans-serif;
+  text-align: center;
+  color: #fff;
+}
+
+h1 {
+  text-shadow: 0 0 15px #00ffff;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(4, 120px);
+  gap: 15px;
+  justify-content: center;
+  margin: 20px;
+}
+
+.card {
+  width: 120px;
+  height: 80px;
+  border: 2px solid #00ffff;
+  border-radius: 12px;
+  cursor: pointer;
+  background: #002222;
+  box-shadow: 0 0 10px #00ffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.card.selected {
+  border-color: #ff00ff;
+  box-shadow: 0 0 20px #ff00ff;
+}
+
+button {
+  padding: 10px 20px;
+  font-size: 16px;
+  background: #ff00ff;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  color: white;
+  box-shadow: 0 0 15px #ff00ff;
+}
+
+.scoreboard {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  font-size: 18px;
+}
+
+#message {
+  margin-top: 10px;
+  font-size: 16px;
+}
