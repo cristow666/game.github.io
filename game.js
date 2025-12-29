@@ -1,114 +1,113 @@
 const board = document.getElementById("board");
-const message = document.getElementById("message");
-const playerScoreEl = document.getElementById("playerScore");
-const aiScoreEl = document.getElementById("aiScore");
+const msg = document.getElementById("message");
+const pScore = document.getElementById("playerScore");
+const aScore = document.getElementById("aiScore");
 
-let cards = [];
 let selected = [];
-let playerScore = 0;
-let aiScore = 0;
+let player = 0;
+let ai = 0;
 
 const shapes = ["●", "■", "▲"];
 const colors = ["red", "lime", "cyan"];
 const numbers = [1, 2, 3];
-const patterns = ["solid", "outline", "striped"];
+
+let deck = [];
+let cards = [];
 
 // CREATE DECK
 function createDeck() {
-  let deck = [];
+  deck = [];
   for (let s of shapes)
     for (let c of colors)
       for (let n of numbers)
-        for (let p of patterns)
-          deck.push({ shape: s, color: c, number: n, pattern: p });
-  return deck;
+        deck.push({ s, c, n });
+
+  deck.sort(() => Math.random() - 0.5);
 }
 
-// DRAW BOARD
-function drawBoard() {
+// DRAW CARDS
+function draw() {
   board.innerHTML = "";
+  selected = [];
+
   cards.forEach((card, i) => {
-    const div = document.createElement("div");
-    div.className = "card";
-    div.style.color = card.color;
-    div.innerText = card.shape.repeat(card.number);
-    div.onclick = () => selectCard(i, div);
-    board.appendChild(div);
+    const d = document.createElement("div");
+    d.className = "card";
+    d.style.color = card.c;
+    d.textContent = card.s.repeat(card.n);
+    d.onclick = () => toggle(i, d);
+    board.appendChild(d);
   });
 }
 
-// SELECT CARD
-function selectCard(index, div) {
-  if (selected.includes(index)) {
-    selected = selected.filter(i => i !== index);
+// SELECT
+function toggle(i, div) {
+  if (selected.includes(i)) {
+    selected = selected.filter(x => x !== i);
     div.classList.remove("selected");
   } else if (selected.length < 3) {
-    selected.push(index);
+    selected.push(i);
     div.classList.add("selected");
   }
 }
 
-// CHECK SET RULE
+// SET RULE
 function isSet(a, b, c) {
-  const props = ["shape", "color", "number", "pattern"];
+  const props = ["s", "c", "n"];
   return props.every(p => {
-    const vals = new Set([a[p], b[p], c[p]]);
-    return vals.size === 1 || vals.size === 3;
+    const v = new Set([a[p], b[p], c[p]]);
+    return v.size === 1 || v.size === 3;
   });
 }
 
 // PLAYER CHECK
 document.getElementById("checkSet").onclick = () => {
   if (selected.length !== 3) {
-    message.innerText = "Select 3 cards!";
+    msg.textContent = "Pick 3 cards";
     return;
   }
 
   const [a, b, c] = selected.map(i => cards[i]);
+
   if (isSet(a, b, c)) {
-    playerScore++;
-    playerScoreEl.innerText = playerScore;
-    message.innerText = "✅ SET FOUND!";
-    replaceCards(selected);
+    player++;
+    pScore.textContent = player;
+    msg.textContent = "✅ YOU FOUND A SET";
+
+    selected.sort((a, b) => b - a).forEach(i => {
+      cards.splice(i, 1);
+      if (deck.length) cards.push(deck.pop());
+    });
   } else {
-    message.innerText = "❌ Not a set!";
+    msg.textContent = "❌ NOT A SET";
   }
-  selected = [];
-  drawBoard();
+
+  draw();
 };
 
-// REPLACE CARDS
-function replaceCards(indexes) {
-  indexes.forEach(i => {
-    cards[i] = deck.pop();
-  });
-}
-
-// AI TURN
-function aiPlay() {
+// AI MOVE (SAFE)
+function aiMove() {
   for (let i = 0; i < cards.length; i++)
     for (let j = i + 1; j < cards.length; j++)
       for (let k = j + 1; k < cards.length; k++) {
         if (isSet(cards[i], cards[j], cards[k])) {
-          aiScore++;
-          aiScoreEl.innerText = aiScore;
-          message.innerText = "🤖 AI found a SET!";
-          replaceCards([i, j, k]);
-          drawBoard();
+          ai++;
+          aScore.textContent = ai;
+          msg.textContent = "🤖 AI FOUND A SET";
+
+          [k, j, i].forEach(x => {
+            cards.splice(x, 1);
+            if (deck.length) cards.push(deck.pop());
+          });
+
+          draw();
           return;
         }
       }
 }
 
-// START GAME
-let deck = createDeck().sort(() => Math.random() - 0.5);
+// START
+createDeck();
 cards = deck.splice(0, 12);
-drawBoard();
-
-// AI every 6 seconds
-setInterval(aiPlay, 6000);
-
-#message {
-  margin-top: 10px;
-  font-size: 16px;
-}
+draw();
+setInterval(aiMove, 7000);
